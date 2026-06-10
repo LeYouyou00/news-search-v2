@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}首页 - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <!-- Hero 区 -->
+    <section class="hero">
+        <div class="hero-bg-grid"></div>
+        <h1 class="hero-title">
+            <span class="gradient-text">智能新闻检索</span>
+            <span class="hero-subtitle">实时搜索 · 智能评分 · 深度分析</span>
+        </h1>
+        <p class="hero-desc">覆盖全球500+主流媒体，24小时内最新资讯，AI驱动多维评分与深度分析</p>
+
+        <!-- 搜索框 -->
+        <form class="search-box" id="searchForm" onsubmit="handleSearch(event)">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="keyword" name="keyword"
+                       placeholder="输入关键词，如：人工智能、量子计算、气候变化..."
+                       autocomplete="off" required>
+                <button type="submit" class="btn btn-search" id="searchBtn">
+                    <span class="btn-text">搜索</span>
+                    <span class="btn-loading" style="display:none">
+                        <span class="spinner"></span>搜索中
+                    </span>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- 功能卡片 -->
+    <section class="feature-cards">
+        <div class="feature-card" onclick="location.href='/schedule'">
+            <div class="card-icon">⏰</div>
+            <h3>定时推送</h3>
+            <p>设置每日定时搜索，自动获取最新新闻并推送通知</p>
+            <span class="card-link">立即配置 →</span>
+        </div>
+        <div class="feature-card disabled-card">
+            <div class="card-icon">📊</div>
+            <h3>趋势分析</h3>
+            <p>追踪关键词热度变化趋势（即将推出）</p>
+            <span class="card-badge">开发中</span>
+        </div>
+        <div class="feature-card disabled-card">
+            <div class="card-icon">📋</div>
+            <h3>搜索历史</h3>
+            <p>查看和管理您的历史搜索记录（即将推出）</p>
+            <span class="card-badge">开发中</span>
+        </div>
+    </section>
+
+    <!-- 最近推送结果 -->
+    <section class="recent-section" id="recentSection" style="display:none">
+        <h2>📬 最近推送结果</h2>
+        <div class="recent-list" id="recentList"></div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function handleSearch(e) {
+    e.preventDefault();
+    var keyword = document.getElementById('keyword').value.trim();
+    if (!keyword) return;
+    var btn = document.getElementById('searchBtn');
+    btn.querySelector('.btn-text').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'inline';
+    btn.disabled = true;
+    window.location.href = '/search/results?keyword=' + encodeURIComponent(keyword);
+}
+</script>
+{% endblock %}

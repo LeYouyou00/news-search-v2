@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}分析报告 - {{ app_name }}{% endblock %}
+
+{% block head %}
+<style>
+    .report-page { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .report-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .report-article { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 40px; }
+    .report-article h1 { color: var(--accent); font-size: 1.6rem; margin-bottom: 0.5em; border-bottom: 2px solid var(--border); padding-bottom: 16px; }
+    .report-article h2 { color: var(--accent); font-size: 1.15rem; margin-top: 1.8em; margin-bottom: 0.6em; }
+    .report-article h3 { color: var(--text); font-size: 1.0rem; margin-top: 1.2em; }
+    .report-article p { line-height: 1.9; color: var(--text); margin-bottom: 1em; }
+    .report-article strong { color: #f59e0b; }
+    .report-article ul, .report-article ol { padding-left: 1.5em; margin-bottom: 1em; }
+    .report-article li { line-height: 1.8; color: var(--text); }
+    .report-article blockquote { border-left: 3px solid var(--accent); padding: 8px 16px; margin: 1em 0; background: rgba(0,212,255,0.05); border-radius: 0 8px 8px 0; }
+    .report-meta { color: var(--text-muted); font-size: 0.85rem; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+    @media (max-width: 768px) { .report-article { padding: 20px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-page">
+    <div class="report-header-bar">
+        <a href="/home" class="btn btn-back">← 返回首页</a>
+        <button class="btn btn-print" onclick="window.print()">🖨️ 打印报告</button>
+    </div>
+
+    {% if report_content %}
+    <div class="report-article">
+        {{ report_content | safe }}
+        <div class="report-meta">
+            📅 生成时间：{{ generated_at }} &nbsp;|&nbsp; 🔑 关键词：{{ keyword }}
+        </div>
+    </div>
+    {% else %}
+    <div class="report-article">
+        <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">报告内容为空</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

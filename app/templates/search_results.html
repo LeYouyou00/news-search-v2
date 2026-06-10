@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}搜索结果 - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="results-page">
+    <div class="results-header-bar">
+        <a href="/home" class="btn btn-back">← 返回首页</a>
+        <h1>搜索结果</h1>
+    </div>
+    <div id="resultsContainer" class="results-container">
+        <div class="loading-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/search.js?v=2.1"></script>
+{% endblock %}

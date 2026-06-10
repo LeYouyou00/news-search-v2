@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=2.1">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="/home" class="nav-logo">
+                <span class="logo-icon">◆</span>
+                <span class="logo-text">{{ app_name }}</span>
+            </a>
+            {% if user %}
+            <div class="nav-actions">
+                <a href="/notifications" class="nav-btn" title="通知中心">
+                    🔔 <span class="badge" id="notifBadge" style="display:none">0</span>
+                </a>
+                <a href="/schedule" class="nav-btn" title="定时推送">⏰</a>
+                <span class="nav-user">👤 {{ user.username }}</span>
+                <a href="/auth/logout" class="nav-btn nav-logout">退出</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast 消息 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    {% block scripts %}{% endblock %}
+    <script src="/static/js/main.js?v=2.1"></script>
+</body>
+</html>

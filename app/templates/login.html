@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}登录 - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <!-- 背景动效 -->
+    <div class="auth-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+    </div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">◆</div>
+            <h1>{{ app_name }}</h1>
+            <p>登录您的账号以继续</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success">{{ success }}</div>
+        {% endif %}
+
+        <form method="POST" action="/auth/login" class="auth-form" id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username"
+                       value="{{ username or '' }}" placeholder="请输入用户名"
+                       required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password"
+                       placeholder="请输入密码" required>
+            </div>
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="privacy_consent" id="privacyConsent" value="true">
+                    <span class="checkmark"></span>
+                    我已阅读并同意<a href="/privacy" target="_blank" class="privacy-link">《隐私政策》</a>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="submitBtn" disabled>
+                登 录
+            </button>
+        </form>
+        <div class="auth-footer">
+            还没有账号？<a href="/auth/register">立即注册</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var cb = document.getElementById('privacyConsent');
+    var btn = document.getElementById('submitBtn');
+    function toggle() {
+        btn.disabled = !cb.checked;
+        btn.style.opacity = cb.checked ? '1' : '0.5';
+    }
+    cb.addEventListener('change', toggle);
+    toggle();
+})();
+</script>
+{% endblock %}

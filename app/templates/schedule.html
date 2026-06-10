@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}定时推送 - {{ app_name }}{% endblock %}
+
+{% block head %}
+<style>
+    .schedule-page { max-width: 800px; margin: 0 auto; padding: 24px; }
+    .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .page-header h1 { color: var(--text); font-size: 1.4rem; margin: 0; }
+
+    .schedule-form-card {
+        background: var(--card-bg); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+    }
+    .schedule-form-card h3 { color: var(--accent); margin-bottom: 16px; }
+
+    .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .form-group { flex: 1; min-width: 140px; }
+    .form-group label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+        background: var(--bg); color: var(--text); font-size: 0.9rem; box-sizing: border-box;
+    }
+    .form-group input:focus, .form-group select:focus {
+        border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px rgba(0,212,255,0.15);
+    }
+
+    .task-list { display: flex; flex-direction: column; gap: 12px; }
+    .task-card {
+        background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 16px 20px; display: flex; align-items: center; gap: 16px;
+        transition: border-color 0.2s;
+    }
+    .task-card:hover { border-color: rgba(0,212,255,0.3); }
+    .task-info { flex: 1; }
+    .task-info .task-keyword { font-size: 1.05rem; font-weight: 600; color: var(--text); }
+    .task-info .task-meta { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .task-status {
+        padding: 4px 12px; border-radius: 20px; font-size: 0.78rem;
+        background: rgba(34,197,94,0.15); color: #22c55e;
+    }
+    .task-status.inactive { background: rgba(148,163,184,0.15); color: #94a3b8; }
+    .btn-delete { padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.3); background: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .btn-delete:hover { background: rgba(239,68,68,0.1); }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    .toast { position: fixed; top: 20px; right: 20px; padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 0.9rem; z-index: 9999; animation: toastIn 0.3s ease; }
+    .toast.success { background: #22c55e; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+        .form-row { flex-direction: column; }
+        .task-card { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="schedule-page">
+    <div class="page-header">
+        <a href="/home" class="btn btn-back">← 返回首页</a>
+        <h1>⏰ 定时推送设置</h1>
+    </div>
+
+    <!-- 新建定时任务表单 -->
+    <div class="schedule-form-card">
+        <h3>📌 新建定时推送</h3>
+        <form id="scheduleForm">
+            <div class="form-row">
+                <div class="form-group" style="flex:2">
+                    <label for="schKeyword">搜索关键词 *</label>
+                    <input type="text" id="schKeyword" placeholder="例如：人工智能" required>
+                </div>
+                <div class="form-group">
+                    <label for="schTime">推送时间 *</label>
+                    <input type="time" id="schTime" value="08:00" required>
+                </div>
+                <div class="form-group">
+                    <label for="schDays">执行日期</label>
+                    <select id="schDays">
+                        <option value="0-6">每天</option>
+                        <option value="1-5">工作日</option>
+                        <option value="0,6">周末</option>
+                        <option value="1">周一</option>
+                        <option value="2">周二</option>
+                        <option value="3">周三</option>
+                        <option value="4">周四</option>
+                        <option value="5">周五</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:0 0 auto">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-primary" style="white-space:nowrap">➕ 创建任务</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 已有任务列表 -->
+    <h3 style="color:var(--text); margin-bottom:12px">📋 已有任务</h3>
+    <div class="task-list" id="taskList">
+        {% if tasks %}
+            {% for t in tasks %}
+            <div class="task-card" id="taskCard_{{ t.id }}">
+                <div class="task-info">
+                    <div class="task-keyword">🔍 {{ t.keyword }}</div>
+                    <div class="task-meta">
+                        ⏰ 每天 {{ t.push_time }} &nbsp;|&nbsp;
+                        📅 {{ t.days_of_week }} &nbsp;|&nbsp;
+                        🕐 上次执行：{{ t.last_executed_at }}
+                    </div>
+                </div>
+                <span class="task-status {% if not t.is_active %}inactive{% endif %}">
+                    {{ '运行中' if t.is_active else '已暂停' }}
+                </span>
+                <button class="btn-delete" data-task-id="{{ t.id }}">🗑 删除</button>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>暂无定时推送任务<br>在上方创建你的第一个定时推送</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/schedule.js?v=2.1"></script>
+{% endblock %}

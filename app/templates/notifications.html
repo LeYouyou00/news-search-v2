@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}通知中心 - {{ app_name }}{% endblock %}
+
+{% block head %}
+<style>
+    .notif-page { max-width: 800px; margin: 0 auto; padding: 24px; }
+    .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .page-header h1 { color: var(--text); font-size: 1.4rem; margin: 0; }
+    .unread-summary { margin-left: auto; color: var(--text-muted); font-size: 0.85rem; }
+
+    .notif-list { display: flex; flex-direction: column; gap: 10px; }
+    .notif-card {
+        background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start;
+        transition: border-color 0.2s; cursor: pointer; position: relative;
+    }
+    .notif-card:hover { border-color: rgba(0,212,255,0.3); }
+    .notif-card.unread { border-left: 3px solid var(--accent); background: rgba(0,212,255,0.04); }
+    .notif-card .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+    .notif-card.read .notif-dot { background: transparent; }
+    .notif-body { flex: 1; }
+    .notif-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .notif-content { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+    .notif-time { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; opacity: 0.7; }
+    .notif-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .btn-notif-action {
+        padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border);
+        background: none; color: var(--accent); cursor: pointer; font-size: 0.82rem;
+        text-decoration: none; white-space: nowrap;
+    }
+    .btn-notif-action:hover { background: rgba(0,212,255,0.08); }
+    .btn-mark-read { padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(148,163,184,0.3); background: none; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; white-space: nowrap; }
+    .btn-mark-read:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .empty-state { text-align: center; padding: 64px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; }
+
+    @media (max-width: 768px) {
+        .notif-card { flex-direction: column; }
+        .notif-actions { align-self: flex-end; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notif-page">
+    <div class="page-header">
+        <a href="/home" class="btn btn-back">← 返回首页</a>
+        <h1>🔔 通知中心</h1>
+        <span class="unread-summary" id="unreadSummary">
+            {% if unread_count %}{{ unread_count }} 条未读{% endif %}
+        </span>
+    </div>
+
+    <div class="notif-list" id="notificationsList">
+        {% if notifications %}
+            {% for n in notifications %}
+            <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="notif_{{ n.id }}">
+                <div class="notif-dot"></div>
+                <div class="notif-body">
+                    <div class="notif-title">
+                        {% if n.type == 'scheduled_result' %}📰{% else %}🔔{% endif %}
+                        {{ n.title }}
+                    </div>
+                    <div class="notif-content">{{ n.content }}</div>
+                    <div class="notif-time">🕐 {{ n.created_at }}</div>
+                </div>
+                <div class="notif-actions">
+                    {% if n.search_id %}
+                    <a href="/search/results/{{ n.search_id }}" class="btn-notif-action">查看结果 →</a>
+                    {% endif %}
+                    {% if not n.is_read %}
+                    <button class="btn-mark-read" data-notif-id="{{ n.id }}">标记已读</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>暂无通知</p>
+                <p style="font-size:0.82rem; margin-top:4px;">定时推送结果会显示在这里</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    'use strict';
+    // 标记已读
+    document.querySelectorAll('.btn-mark-read').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var notifId = this.dataset.notifId;
+            var card = document.getElementById('notif_' + notifId);
+            fetch('/notifications/api/notifications/' + notifId + '/read', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success && card) {
+                    card.classList.remove('unread');
+                    card.classList.add('read');
+                    btn.remove();
+                    updateUnreadCount();
+                }
+            });
+        });
+    });
+
+    function updateUnreadCount() {
+        var unread = document.querySelectorAll('.notif-card.unread').length;
+        var summary = document.getElementById('unreadSummary');
+        if (summary) {
+            summary.textContent = unread > 0 ? unread + ' 条未读' : '';
+        }
+    }
+})();
+</script>
+{% endblock %}
