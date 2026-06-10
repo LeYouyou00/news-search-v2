@@ -1,0 +1,30 @@
+# 环境变量
+.env
+!.env.example
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# 文档
+*.md
+DEPLOY.md

@@ -1,26 +1,31 @@
+# 环境变量 - 包含真实 API Key，绝对不能提交
+.env
+!.env.example
+
+# 数据库文件 - 运行时自动生成，不应版本管理
+*.db
+*.sqlite
+*.sqlite3
+
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
 *.egg-info/
 dist/
 build/
-venv/
-.venv/
 *.egg
+.venv/
+venv/
 
-# 环境变量（含 API Key，切勿提交）
-.env
-.env.local
-.env.production
+# Node
+node_modules/
+.pnp
+.pnp.js
 
-# 数据库
-instance/
-*.db
-*.sqlite3
-
-# 缓存
-.cache/
-*.pyc
+# 构建产物
+frontend/dist/
 
 # IDE
 .vscode/
@@ -29,18 +34,9 @@ instance/
 *.swo
 *~
 
-# OS
+# 系统文件
 .DS_Store
 Thumbs.db
 
-# 日志
-*.log
-logs/
-
-# 测试
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Claude
-.claude/
+# Docker（.dockerignore 需要提交到仓库，供 Docker 构建使用）
+!.dockerignore
